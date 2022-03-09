@@ -50,7 +50,7 @@ class CoordGuesser:
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        locale = QSettings().value('locale/userLocale')[:2]
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
@@ -190,8 +190,3 @@ class CoordGuesser:
         dlg.show()
         # Run the dialog event loop
         result = dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass

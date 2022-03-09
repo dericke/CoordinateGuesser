@@ -160,11 +160,9 @@ class CoordGuesserDialog(MainWindowBase, MainWindowUI):
         layersDict = QgsProject.instance().mapLayers()
         allLayers = list(layersDict.values())
         destinationComboBox.clear()
-        vectorList = []
-        for layer in allLayers:
-            if layer.type() == QgsMapLayer.VectorLayer:
-                # allLayers.remove(layer)
-                vectorList.append(layer)
+        vectorList = [
+            layer for layer in allLayers if layer.type() == QgsMapLayer.VectorLayer
+        ]
 
         try:
             vectorList = sorted(vectorList, key=lambda layer: layer.name().lower(), reverse=True)
@@ -371,8 +369,7 @@ class CoordGuesserDialog(MainWindowBase, MainWindowUI):
 
     def getAdditionalProj(self):
         projlist = []
-        addProjText = self.lineEdit_addProj.text()
-        if addProjText:
+        if addProjText := self.lineEdit_addProj.text():
             if len(addProjText) in range(1, 3):
                 try:
                     myzone = int(addProjText)
@@ -408,13 +405,12 @@ class CoordGuesserDialog(MainWindowBase, MainWindowUI):
             # self.distance.setText('{:.4f} deg'.format(distance))
 
             self.distance.setText('{:,.3f} km'.format(distanceInKm))
-            self.method_used.setText(unmangler)
-
         else:
             output_pt, unmangler = first_guess[0],first_guess[1]
             self.out_xy.setText(f"{output_pt[0]:10.10f}, {output_pt[1]:10.10f}")
-            self.distance.setText(f"No guess given")
-            self.method_used.setText(unmangler)
+            self.distance.setText("No guess given")
+        self.method_used.setText(unmangler)
+
         unmangledPt = QgsPointXY(float(output_pt[0]), float(output_pt[1]))
         self.unmangledMarker.setCenter(unmangledPt)
         self.unmangledMarker.show()
@@ -436,7 +432,7 @@ class CoordGuesserDialog(MainWindowBase, MainWindowUI):
         inputPath = self.lineEdit_filePath.text()
         (dirPath, fileName) = os.path.split(os.path.abspath(inputPath))
 
-        newFileName = os.path.splitext(fileName)[0] + "_output" + '.csv'
+        newFileName = f'{os.path.splitext(fileName)[0]}_output.csv'
         outputPath = os.path.join(dirPath, newFileName)
         return inputPath, outputPath
 
@@ -445,15 +441,18 @@ class CoordGuesserDialog(MainWindowBase, MainWindowUI):
         """opens the file browser and gets the csv file path from the user"""
         self.radioButton_batch.setChecked(True)
         if isShpFile == 0:
-            filename1 = QFileDialog.getOpenFileName(self, str("Open File"), "", str("CSV Files (*.csv)"))
-            ##filename1 is a tuple, filename[0] is the path, filename[1] is the file type
-            if filename1[0] != None:
-                self.lineEdit_filePath.setText(filename1[0])
+            filename1 = QFileDialog.getOpenFileName(
+                self, "Open File", "", "CSV Files (*.csv)"
+            )
 
         else:
-            filename1 = QFileDialog.getOpenFileName(self, str("Open File"), "", str("SHP Files (*.shp)"))
-            if filename1[0] != None:
-                self.lineEdit_filePath.setText(filename1[0])
+            filename1 = QFileDialog.getOpenFileName(
+                self, "Open File", "", "SHP Files (*.shp)"
+            )
+
+        ##filename1 is a tuple, filename[0] is the path, filename[1] is the file type
+        if filename1[0] != None:
+            self.lineEdit_filePath.setText(filename1[0])
 
 
     def changeMessage(self, mytext):

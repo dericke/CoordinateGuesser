@@ -97,10 +97,7 @@ if __name__ == "__main__":
         username = getpass.getuser()
         print("Please enter user name [%s] :" % username, end=' ')
         res = input()
-        if res != "":
-            options.username = res
-        else:
-            options.username = username
+        options.username = res if res != "" else username
     if not options.password:
         # interactive mode
         options.password = getpass.getpass()

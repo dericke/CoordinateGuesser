@@ -64,8 +64,7 @@ class identDMS:
         blacklist = [chr(u) for u in [0x0064, 0x006d, 0x0022]]
         for b in blacklist:
             x = x.replace(b, ' ', 1)
-        split = [i for i in re.split('[^\d.,]+',x,3) if len(i) > 0]
-        return split
+        return [i for i in re.split('[^\d.,]+',x,3) if len(i) > 0]
 
     def can(self,x):
         x,sign,pos = extractSignfromGeo(x)

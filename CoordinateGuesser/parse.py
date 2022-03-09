@@ -39,7 +39,6 @@ def genUnmanglers(additionalprojs,ix,iy):
 
     utmgens = utmgens + utmEastingLMDigit + utmNorthingLMDigit
     for aup in additionalprojs:
-
        # if isinstance(aup,int) or len(aup) == 1:
          #   aup = (0,0,aup)
        # else isinstance(aup,string):
@@ -48,13 +47,11 @@ def genUnmanglers(additionalprojs,ix,iy):
         utmgens.append(utmBiasedGen(*aup))
         #utmgens.append(utmBiasedGen(aup)) #chen
     for gen in utmgens:
-        for u in gen(*utmHalfcors):
-            dest.append(u)
+        dest.extend(iter(gen(*utmHalfcors)))
     #todo make a repository for all these types
     geohalfcors = [concattedDMS(), identDMS(), identDecDegGeo(), identDecMinGeo(), identDecSecGeo()]
     for gen in [geoGen()]:
-        for u in gen(*geohalfcors):
-            dest.append(u)
+        dest.extend(iter(gen(*geohalfcors)))
     return dest
 
 def dist(p1, p2, transform):
@@ -143,7 +140,7 @@ def Parse(inp, approxPoint = None, additionalprojs = [], delimiter = '[\t,]'):
 
 def decToDms(dec, secdigits = 3):
     if dec < 0:
-        return "-"+decToDms(-dec)
+        return f"-{decToDms(-dec)}"
     d = dec - (dec%1)
     dec = (dec-d)*60
     m = dec - (dec%1)

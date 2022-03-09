@@ -9,9 +9,7 @@ def get_encoding_by_bom(filename):
     raw = open(filename, 'rb').read(bytes)
 
     result = chardet.detect(raw)
-    #print(result)
-    encoding = result['encoding']
-    return encoding
+    return result['encoding']
 
 
 def read_txt_by_bom(filename, encoding):
