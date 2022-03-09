@@ -22,10 +22,10 @@ class Unmangler:
         to the toCor function if so
         """
         ret, cx = self.x.can(x)
-        if ret == -1 or ret == 1:
+        if ret in [-1, 1]:
             return False, None, None
         ret, cy = self.y.can(y)
-        if ret == -1 or ret == 0:
+        if ret in [-1, 0]:
             return False, None, None
         return True, cx, cy
 
@@ -44,8 +44,8 @@ class Unmangler:
         if self.x == self.y:
             halcore = str(self.x)
         else:
-            halcore = "x: "+str(self.x)+", y: "+str(self.y)
-        return "regular WGS84GEO; submanglers: "+halcore
+            halcore = f"x: {str(self.x)}, y: {str(self.y)}"
+        return f"regular WGS84GEO; submanglers: {halcore}"
 
 
 class UtmUnmangler (Unmangler):
@@ -75,7 +75,7 @@ class UtmUnmangler (Unmangler):
         if self.x == self.y:
             halcore = str(self.x)
         else:
-            halcore = "x: " + str(self.x) + ", y: " + str(self.y)
+            halcore = f"x: {str(self.x)}, y: {str(self.y)}"
         return "projection converter mangler from projection ("+ self.projstring +"); submanglers: " + halcore
 
 
@@ -98,7 +98,7 @@ class UtmBiasedUnmangler(UtmUnmangler):
         if self.x == self.y:
             halcore = str(self.x)
         else:
-            halcore = "x: " + str(self.x) + ", y: " + str(self.y)
+            halcore = f"x: {str(self.x)}, y: {str(self.y)}"
         return "projection converter mangler from projection ("+ self.projstring +") with biases ({}; {}), submanglers: ".format(self.xoffset,self.yoffset) + halcore
 
 
@@ -116,7 +116,7 @@ class InverterUnmangler:
         return self.base.toCor(y, cx, x, cy)
 
     def __str__(self):
-        return "Inverted unmangler of "+str(self.base)
+        return f"Inverted unmangler of {str(self.base)}"
 
 
 class UtmBiasedInvertedUnmangler(UtmBiasedUnmangler):
@@ -124,9 +124,7 @@ class UtmBiasedInvertedUnmangler(UtmBiasedUnmangler):
         UtmBiasedUnmangler.__init__(self, xoffset, yoffset, projstring, xUnmangler, yUnmangler=None)
 
     def toCor(self,x,cx,y,cy):
-        temp = x
-        x = y
-        y = temp
+        x, y = y, x
         ux, uy = Unmangler.toCor(self, x, cx, y, cy)
         ux += self.xoffset
         uy += self.yoffset
@@ -136,7 +134,7 @@ class UtmBiasedInvertedUnmangler(UtmBiasedUnmangler):
         if self.x == self.y:
             halcore = str(self.x)
         else:
-            halcore = "x: " + str(self.x) + "; y: " + str(self.y)
+            halcore = f"x: {str(self.x)}; y: {str(self.y)}"
         return "projection inverted converter mangler from projection ("+ self.projstring +") with biases ({}; {}); submanglers: ".format(self.xoffset,self.yoffset) + halcore
 
 class ToggleSignUnmangler (Unmangler):
@@ -163,5 +161,5 @@ class ToggleSignUnmangler (Unmangler):
         if self.x == self.y:
             halcore = str(self.x)
         else:
-            halcore = "x: " + str(self.x) + ", y: " + str(self.y)
+            halcore = f"x: {str(self.x)}, y: {str(self.y)}"
         return "projection converter mangler from projection ("+ self.projstring +"); submanglers: " + halcore

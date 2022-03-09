@@ -126,10 +126,9 @@ def read_using_field(coordlist, reader, header, additional_pj):
             if header:
                 if row and len(row) > 3:
                     coordlist.append(row[3:])
-                    continue
                 else:
                     coordlist.append([])
-                    continue
+                continue
             else:
                 coordlist.append([])
         if row:
@@ -138,11 +137,7 @@ def read_using_field(coordlist, reader, header, additional_pj):
 
             coordelem = SingleCoord((row[0], row[1]), row[2])
             coordelem.additional_pj = additional_pj
-            if row[3:] is not None:  # if there is other data to save
-                coordelem.data = row[3:]
-            else:
-                coordelem.data = []
-
+            coordelem.data = row[3:] if row[3:] is not None else []
             lastattr = row[2]
             coordelem.group = lastgroup
             coordlist.append(coordelem)
@@ -159,10 +154,9 @@ def read_no_guess_field(coordlist, reader, header, additional_pj):
             if header:
                 if row and len(row) > 2:
                     coordlist.append(row[2:])
-                    continue
                 else:
                     coordlist.append([])
-                    continue
+                continue
             else:
                 coordlist.append([])
 
@@ -170,10 +164,7 @@ def read_no_guess_field(coordlist, reader, header, additional_pj):
             coordelem = SingleCoord((row[0], row[1]))
             coordelem.group = lastgroup
             lastgroup = lastgroup + 1
-            if row[2:] is not None:
-                coordelem.data = row[2:]
-            else:
-                coordelem.data = []
+            coordelem.data = row[2:] if row[2:] is not None else []
             coordelem.additional_pj = additional_pj
             coordlist.append(coordelem)
 
@@ -184,18 +175,14 @@ def read_using_guess(coordlist, reader, header, additional_pj):
             if header:
                 if row and len(row) > 2:
                     coordlist.append(row[2:])
-                    continue
                 else:
                     coordlist.append([])
-                    continue
+                continue
             else:
                 coordlist.append([])
         if row:
             coordelem = SingleCoord((row[0], row[1]))
-            if row[2:] is not None:
-                coordelem.data = row[2:]
-            else:
-                coordelem.data = []
+            coordelem.data = row[2:] if row[2:] is not None else []
             coordelem.additional_pj = additional_pj
             coordlist.append(coordelem)
 
@@ -241,15 +228,9 @@ def parse_coord_list(coordlist):
 
 
 def parsefile(input_file, guessx, guessy, fileformat, header, guesslayer=None, guessfield=None, additional_pj=[]):
-    if guessy and guessx:
-        using_guess = True
-    else:
-        using_guess = False
+    using_guess = bool(guessy and guessx)
     print("using guess: {}".format(using_guess))
-    if guesslayer and guessfield:
-        using_field = True
-    else:
-        using_field = False
+    using_field = bool(guesslayer and guessfield)
     print("using_fields: {}".format(using_field))
     # coordlist structure:
     #   if header       [[header1, header2],SingleCoord1,SingleCoord2,SingleCoord3]
@@ -300,7 +281,7 @@ def add_poly_feature(layer, elem, coordlist, wkt):
 
 def to_poly(input_file, coordlist):
 
-    output_file = in_path_to_dir(input_file) + "_polygon_output.shp"
+    output_file = f'{in_path_to_dir(input_file)}_polygon_output.shp'
     data_source = create_data_source(output_file)
     try:
         srs = osr.SpatialReference()
@@ -343,7 +324,7 @@ def to_poly(input_file, coordlist):
 
 
 def to_points(input_file, coordlist):
-    output_file = in_path_to_dir(input_file) + "_point_output.shp"
+    output_file = f'{in_path_to_dir(input_file)}_point_output.shp'
     data_source = create_data_source(output_file)
     try:
         srs = osr.SpatialReference()
@@ -372,7 +353,7 @@ def to_csv(input_file, coordlist):
             myheader = ["mangled_X", "mangled_Y", "guess_X", "guess_Y", "unmangled_X",
                         "unmangled_Y", "distance_[km]", "method", "additional_pj"]
 
-        myheader = myheader + coordlist[0]
+        myheader += coordlist[0]
 
         writer.writerow(myheader)
 
@@ -392,7 +373,7 @@ def to_csv(input_file, coordlist):
 
 
 def in_path_to_out(input_path):
-    return os.path.splitext(input_path)[0] + "_output"
+    return f'{os.path.splitext(input_path)[0]}_output'
 
 
 def in_path_to_dir(input_path):
@@ -401,19 +382,17 @@ def in_path_to_dir(input_path):
 
 def create_data_source_shp(output_file):
     driver = ogr.GetDriverByName("ESRI Shapefile")
-    shapepath = os.path.splitext(output_file)[0] + ".shp"
+    shapepath = f'{os.path.splitext(output_file)[0]}.shp'
     if os.path.exists(shapepath):
         os.remove(shapepath)
-    data_source = driver.CreateDataSource(shapepath)
-    return data_source
+    return driver.CreateDataSource(shapepath)
 
 
 def create_data_source(output_file):
     driver = ogr.GetDriverByName("ESRI Shapefile")
     if os.path.exists(output_file):
         os.remove(output_file)
-    data_source = driver.CreateDataSource(output_file)
-    return data_source
+    return driver.CreateDataSource(output_file)
 
 
 def create_wkt_poly(pointlist):
@@ -422,11 +401,10 @@ def create_wkt_poly(pointlist):
     if len(pointlist) > 1:
         for point in pointlist:
             wkt = wkt + "{:f} {:f}, ".format(point[0], point[1])
-        wkt = wkt + "{:f} {:f}".format(pointlist[0][0], pointlist[0][1]) #add first point again
     else:
         wkt = wkt + "{:f} {:f}, ".format(pointlist[0][0], pointlist[0][1])
-        wkt = wkt + "{:f} {:f}".format(pointlist[0][0], pointlist[0][1])
-    wkt = wkt + "))"
+    wkt = wkt + "{:f} {:f}".format(pointlist[0][0], pointlist[0][1]) #add first point again
+    wkt = f'{wkt}))'
     return wkt
 
 
